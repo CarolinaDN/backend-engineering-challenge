@@ -1,86 +1,70 @@
 # Backend Engineering Challenge
 
+Python version: 3.9.8
 
-Welcome to our Engineering Challenge repository 🖖
-
-If you found this repository it probably means that you are participating in our recruitment process. Thank you for your time and energy. If that's not the case please take a look at our [openings](https://unbabel.com/careers/) and apply!
-
-Please fork this repo before you start working on the challenge, read it careful and take your time and think about the solution. Also, please fork this repository because we will evaluate the code on the fork.
-
-This is an opportunity for us both to work together and get to know each other in a more technical way. If you have any questions please open and issue and we'll reach out to help.
-
-Good luck!
-
-## Challenge Scenario
-
-At Unbabel we deal with a lot of translation data. One of the metrics we use for our clients' SLAs is the delivery time of a translation. 
-
-In the context of this problem, and to keep things simple, our translation flow is going to be modeled as only one event.
-
-### *translation_delivered*
-
-Example:
-
-```json
-{
-	"timestamp": "2018-12-26 18:12:19.903159",
-	"translation_id": "5aa5b2f39f7254a75aa4",
-	"source_language": "en",
-	"target_language": "fr",
-	"client_name": "airliberty",
-	"event_name": "translation_delivered",
-	"duration": 20,
-	"nr_words": 100
-}
+This project contains the following folders:  
+```
+├── requirements
+├── unbabel_app
+│   ├── taks
+│   │   ├── dataload.py : first step to load given input.
+│   │   ├── cleandata.py : cleans, resamples and aggregates data.
+│   │   ├── moving_avg.py : calculations related to moving average.
+│   │   ├── output.py : last step to save the data.
+│   │   ├── orchestrator: call the functions from the python scripts in the relevant order.
+│   ├── tests
+│   │   ├── generate_data.py : script used to create more sample data.
+│   │   ├── src : tests created for the tasks.
+├── Other files were created to have a functional cli project.
 ```
 
-## Challenge Objective
 
-Your mission is to build a simple command line application that parses a stream of events and produces an aggregated output. In this case, we're interested in calculating, for every minute, a moving average of the translation delivery time for the last X minutes.
+## How To Run
 
-If we want to count, for each minute, the moving average delivery time of all translations for the past 10 minutes we would call your application like (feel free to name it anything you like!).
+Clone repo and move to dir **backend-engineering-challenge**.
 
-	unbabel_cli --input_file events.json --window_size 10
-	
-The input file format would be something like:
+Create virtual environment, activate it and install requirements: `pip install -r requirements/requirements.txt`
 
-	{"timestamp": "2018-12-26 18:11:08.509654","translation_id": "5aa5b2f39f7254a75aa5","source_language": "en","target_language": "fr","client_name": "airliberty","event_name": "translation_delivered","nr_words": 30, "duration": 20}
-	{"timestamp": "2018-12-26 18:15:19.903159","translation_id": "5aa5b2f39f7254a75aa4","source_language": "en","target_language": "fr","client_name": "airliberty","event_name": "translation_delivered","nr_words": 30, "duration": 31}
-	{"timestamp": "2018-12-26 18:23:19.903159","translation_id": "5aa5b2f39f7254a75bb3","source_language": "en","target_language": "fr","client_name": "taxi-eats","event_name": "translation_delivered","nr_words": 100, "duration": 54}
+To run the tests use: `python -m unittest unbabel_app`.
 
-Assume that the lines in the input are ordered by the `timestamp` key, from lower (oldest) to higher values, just like in the example input above.
-
-The output file would be something in the following format.
+To run the app this is the basic command: `python unbabel_cli.py --input_file events.json`.
 
 ```
-{"date": "2018-12-26 18:11:00", "average_delivery_time": 0}
-{"date": "2018-12-26 18:12:00", "average_delivery_time": 20}
-{"date": "2018-12-26 18:13:00", "average_delivery_time": 20}
-{"date": "2018-12-26 18:14:00", "average_delivery_time": 20}
-{"date": "2018-12-26 18:15:00", "average_delivery_time": 20}
-{"date": "2018-12-26 18:16:00", "average_delivery_time": 25.5}
-{"date": "2018-12-26 18:17:00", "average_delivery_time": 25.5}
-{"date": "2018-12-26 18:18:00", "average_delivery_time": 25.5}
-{"date": "2018-12-26 18:19:00", "average_delivery_time": 25.5}
-{"date": "2018-12-26 18:20:00", "average_delivery_time": 25.5}
-{"date": "2018-12-26 18:21:00", "average_delivery_time": 25.5}
-{"date": "2018-12-26 18:22:00", "average_delivery_time": 31}
-{"date": "2018-12-26 18:23:00", "average_delivery_time": 31}
-{"date": "2018-12-26 18:24:00", "average_delivery_time": 42.5}
+python unbabel_cli.py --help
+usage: unbabel_cli.py [-h] --input_file INPUT_FILE [--window_size WINDOW_SIZE] [--nr_words NR_WORDS]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --input_file INPUT_FILE
+                        Path to input file
+  --window_size WINDOW_SIZE, -ws WINDOW_SIZE
+                        Window size in minutes. Defaults to 10
+  --nr_words NR_WORDS   If True it will return the moving average of words with window size defined. Defaults to False 
 ```
 
-#### Notes
+## First Steps
+- Inital checks on data: 
+  - There seems to be some correlation between nb of words and duration.
+  - Easier to work with a pandas dataframe than a json file.
+- Define project layout.
+- Create virtual environment.
+- Setup requirements with pip-compile (pip==21.3.1 and pip-tools==6.4.0) and install them.
+- Checks that will be necessary: input file and window size.
+- Setup project.
+- Add on: moving average of number of words using given window size.
 
-Before jumping right into implementation we advise you to think about the solution first. We will evaluate, not only if your solution works but also the following aspects:
 
-+ Simple and easy to read code. Remember that [simple is not easy](https://www.infoq.com/presentations/Simple-Made-Easy)
-+ Comment your code. The easier it is to understand the complex parts, the faster and more positive the feedback will be
-+ Consider the optimizations you can do, given the order of the input lines
-+ Include a README.md that briefly describes how to build and run your code, as well as how to **test it**
-+ Be consistent in your code. 
+## Difficulties:
+- Resample not obtaining the correct closed values.
+  - Tested with label="left" and closed="right"
+  - Tried different pandas versions
+  - Tested xarray
+  - Implemented a fix that check the first timestamp and the resample
 
-Feel free to, in your solution, include some your considerations while doing this challenge. We want you to solve this challenge in the language you feel most comfortable with. Our machines run Python (3.7.x or higher) or Go (1.16.x or higher). If you are thinking of using any other programming language please reach out to us first 🙏.
-
-Also, if you have any problem please **open an issue**. 
-
-Good luck and may the force be with you
+## Considerations for next steps:
+- More checks
+- Add more things to .gitignore (.json files)
+- Could have more docstrings
+- Add logs
+- Are there filters and other checks on data that should be considered according to the business? For example: client_name, source_language, target_language, or event_name. Should be discussed with people more familiar with the data and use cases of the application.
+- More tests for each function and integration test

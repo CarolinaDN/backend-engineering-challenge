@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=58.1.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unbabel_cli"
+readme = "README.md"
+authors = [{ name = "Carolina Neves"}]
+
+[tool.ruff]
+line-length = 120
+preview = true
+exclude = [
+    ".git"
+]
